@@ -1,8 +1,14 @@
 <script>
+import { getTransitionRawChildren } from "vue";
+
 export default {
   data() {
     return {
       darkTheme: false,
+      current: "",
+      operator: null,
+      previous: null,
+      operatorClicked: false,
     };
   },
   computed: {
@@ -14,71 +20,115 @@ export default {
     toggleTheme() {
       this.darkTheme = !this.darkTheme;
     },
+    clear() {
+      this.current = "";
+    },
+    sign() {
+      this.current =
+        this.current.charAt(0) === "-"
+          ? this.current.slice(1)
+          : `-${this.current}`;
+    },
+    percent() {
+      this.current = `${parseFloat(this.current) / 100}`;
+    },
+    append(number) {
+      if (this.operatorClicked) {
+        this.current = "";
+        this.operatorClicked = false;
+      }
+      this.current = `${this.current}${number}`;
+    },
+    dot() {
+      if (this.current.indexOf(".") === -1) {
+        this.append(".");
+      }
+    },
+    setPrevious() {
+      this.previous = this.current;
+      this.operatorClicked = true;
+    },
+    divide() {
+      this.operator = (a, b) => a / b;
+      this.setPrevious();
+    },
+    minus() {
+      this.operator = (a, b) => a - b;
+      this.setPrevious();
+    },
+    add() {
+      this.operator = (a, b) => a + b;
+      this.setPrevious();
+    },
+    times() {
+      this.operator = (a, b) => a * b;
+      this.setPrevious();
+    },
+    equal() {
+      this.current = `${this.operator(
+        parseFloat(this.current),
+        parseFloat(this.previous)
+      )}`;
+    },
   },
 };
 </script>
 
 <template>
   <div class="calculator" :class="theme">
-    <label for="darkmode-toggle" @click="toggleTheme"></label>
-    <div class="screen"></div>
-    <div class="buttons-container">
-      <button class="button">7</button>
-      <button class="button">8</button>
-      <button class="button">9</button>
-      <button class="button">+</button>
-      <button class="button">4</button>
-      <button class="button">5</button>
-      <button class="button">6</button>
-      <button class="button">-</button>
-      <button class="button">1</button>
-      <button class="button">2</button>
-      <button class="button">3</button>
-      <button class="button">x</button>
-      <button class="button color-red">C</button>
-      <button class="button">0</button>
-      <button class="button">=</button>
-      <button class="button">/</button>
-    </div>
+    <!-- <label for="darkmode-toggle" @click="toggleTheme"></label> -->
+    <div class="display">{{ current || "0" }}</div>
+    <div class="btn" @click="clear">C</div>
+    <div class="btn" @click="sign">+/-</div>
+    <div class="btn" @click="percent">%</div>
+    <div class="btn operator" @click="devide">÷</div>
+    <div class="btn" @click="append('7')">7</div>
+    <div class="btn" @click="append('8')">8</div>
+    <div class="btn" @click="append('9')">9</div>
+    <div class="btn operator" @click="times('x')">x</div>
+    <div class="btn" @click="append('4')">4</div>
+    <div class="btn" @click="append('5')">5</div>
+    <div class="btn" @click="append('6')">6</div>
+    <div class="btn operator" @click="minus('-')">-</div>
+    <div class="btn" @click="append('1')">1</div>
+    <div class="btn" @click="append('2')">2</div>
+    <div class="btn" @click="append('3')">3</div>
+    <div class="btn operator" @click="add('+')">+</div>
+    <div class="btn zero" @click="append('0')">0</div>
+    <div class="btn" @click="dot">.</div>
+    <div class="btn operator" @click="equal('=')">=</div>
   </div>
 </template>
 
 <style scoped>
 .calculator {
-  width: 320px;
-  height: 450px;
-  border: 2px solid black;
   margin: 0 auto;
-  background-color: #37374d;
+  width: 250px;
+  font-size: 25px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(50px, auto);
 }
-.screen {
-  width: 280px;
-  height: 70px;
-  border: 2px solid black;
-  margin: 30px auto;
-  background-color: azure;
-}
-.buttons-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-.button {
-  width: 50px;
-  height: 50px;
-  border: 1px solid black;
-  background-color: azure;
-  font-size: 15px;
+.display {
+  grid-column: 1 / 5;
+  grid-row: 1 / 3;
+  background-color: #333;
+  color: white;
 }
 
-.color-red {
-  background-color: rgba(255, 0, 0, 1);
+.btn {
+  border: 1px solid #999;
+  background-color: #eee;
+  text-align: center;
+  align-items: center;
+}
+
+.zero {
+  grid-column: 1/3;
+}
+.operator {
+  background-color: orange;
   color: white;
-  font-weight: 900;
-  font-size: 18px;
 }
 .button:active {
   background-color: rgba(220, 216, 239, 0.931);
@@ -114,15 +164,6 @@ label:after {
   border-radius: 18px;
   box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
   transition: 0.3s;
-}
-
-input:checked + label {
-  background: #242424;
-}
-input:checked + label:after {
-  left: 490px;
-  transform: translateX(-100%);
-  background: linear-gradient(180deg, #777, #3a3a3a);
 }
 </style>
 
