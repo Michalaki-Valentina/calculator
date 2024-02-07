@@ -1,11 +1,11 @@
 <script>
-import HelloWorld from "../components/HelloWorld.vue";
+import Calculator from "../components/Calculator.vue";
 
 export default {
-  components: { HelloWorld },
+  components: { Calculator },
 };
 </script>
 
 <template>
-  <HelloWorld />
+  <Calculator />
 </template>
